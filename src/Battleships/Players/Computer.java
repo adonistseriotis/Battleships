@@ -17,10 +17,8 @@ public class Computer extends Player{
 
     private Stack<Coordinates> nextShots;
     private Random random = new Random();
-    private Human enemy;
 
-    public Computer(Grid grid){
-        this.myGrid = grid;
+    public Computer(){
         this.allShips = 5;
         this.hasLost = false;
         this.points = 0;
@@ -92,7 +90,15 @@ public class Computer extends Player{
         }
 
         else{
-            Coordinates nextAttackSquare = nextShots.pop();
+            Coordinates nextAttackSquare;
+            do{
+                if(nextShots.isEmpty()) {
+                    findNextShot();
+                    return;
+                }
+                nextAttackSquare = nextShots.pop();
+            }while(!nextAttackSquare.isEmpty());
+
             if(enemy.shotsTaken(nextAttackSquare) > 0){
                 x = nextAttackSquare.x;
                 y = nextAttackSquare.y;
@@ -105,6 +111,9 @@ public class Computer extends Player{
                     nextShots.push(enemy.myGrid.getSquare(x, y - 1));
                 if (y + 1 < 10)
                     nextShots.push(enemy.myGrid.getSquare(x, y + 1));
+            }
+            else{
+                System.out.println("OMG I'M HERE");
             }
         }
     }

@@ -12,8 +12,7 @@ import Battleships.Board.Ship;
  */
 public class Human extends Player{
 
-    public Human(Grid grid){
-        this.myGrid = grid;
+    public Human(){
         this.allShips = 5;
         this.hasLost = false;
         this.points = 0;
@@ -59,4 +58,8 @@ public class Human extends Player{
     /*
     Human fire is handled by mouse handler
      */
+    @Override
+    public void findNextShot(){
+        return;
+    }
 }

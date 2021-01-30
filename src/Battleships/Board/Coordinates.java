@@ -27,7 +27,7 @@ public class Coordinates extends Rectangle{
     public boolean shotsFired(){
         isShot=true;
 
-        if(ship != null){
+        if(!this.isEmpty()){
             setFill(Color.RED);
             return true;
         }
@@ -37,10 +37,9 @@ public class Coordinates extends Rectangle{
 
     /**
      *
-     * @param x X coordinate
-     * @param y Y coordinate
      * @return true if there is no other ship
      */
+
     public boolean isEmpty(){
         return (this.ship == null);
     }

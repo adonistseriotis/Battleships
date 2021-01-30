@@ -13,14 +13,15 @@ import java.util.List;
  * Abstract class to represent Player
  */
 public abstract class Player {
-    Grid myGrid;
-    List<Ship> myShips;
-    int allShips;
-    boolean hasLost;
-    int points;
+    public Grid myGrid;
+    public List<Ship> myShips;
+    public int allShips;
+    public boolean hasLost;
+    public int points;
     public Player enemy;
-    int shotsLeft;
+    public int shotsLeft;
 
-    abstract boolean placeShip(Ship s);
-    abstract int shotsTaken(Coordinates square);
+    abstract public boolean placeShip(Ship s);
+    abstract public int shotsTaken(Coordinates square);
+    abstract public void findNextShot();
 }
