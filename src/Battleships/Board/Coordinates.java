@@ -1,0 +1,47 @@
+package Battleships.Board;
+
+import java.util.*;
+import javafx.scene.layout.HBox;
+import javafx.scene.shape.Rectangle;
+import javafx.scene.paint.Color;
+
+import Battleships.Board.Ship;
+
+
+public class Coordinates extends Rectangle{
+    public int x,y;
+    public Ship ship=null;
+    public boolean isShot=false;
+
+    private Grid parentGrid;
+
+    public Coordinates(int x,int y, Grid grid) {
+        super(30, 30);
+        this.x = x;
+        this.y = y;
+        this.parentGrid = grid;
+        setFill(Color.WHITE);
+        setStroke(Color.BLACK);
+    }
+
+    public boolean shotsFired(){
+        isShot=true;
+
+        if(ship != null){
+            setFill(Color.RED);
+            return true;
+        }
+        setFill(Color.GRAY);
+        return false;
+    }
+
+    /**
+     *
+     * @param x X coordinate
+     * @param y Y coordinate
+     * @return true if there is no other ship
+     */
+    public boolean isEmpty(){
+        return (this.ship == null);
+    }
+}
