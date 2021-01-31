@@ -83,8 +83,8 @@ public class Grid extends Parent implements Cloneable{
             }*/
             Coordinates c = getSquare(x,y);
 
-            //if(parentPlayer instanceof Human)
-            c.setFill(Color.GREEN);
+            if(parentPlayer instanceof Human)
+                c.setFill(Color.GREEN);
             /*if(c.ship != null){
                 OverlapTilesException Overlap =
                         new OverlapTilesException("There is another ship here");
