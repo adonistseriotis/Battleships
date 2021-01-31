@@ -2,26 +2,26 @@ package Battleships;
 
 import java.util.*;
 
-class MyException extends Exception {
-    class OversizeException extends Exception {
+public class MyExceptions extends Exception {
+    public static class OversizeException extends Exception {
         public OversizeException(String s) {
             super(s);
         }
     }
 
-    class OverlapTilesException extends Exception {
+    public static class OverlapTilesException extends Exception {
         public OverlapTilesException(String s) {
             super(s);
         }
     }
 
-    class AdjacentTilesException extends Exception {
+    public static class AdjacentTilesException extends Exception {
         public AdjacentTilesException(String s) {
             super(s);
         }
     }
 
-    class InvalidCountException extends Exception {
+    public static class InvalidCountException extends Exception {
         public InvalidCountException(String s) {
             super(s);
         }

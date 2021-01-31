@@ -1,21 +1,19 @@
 package Battleships.Board;
 
-import java.util.*;
-
+import Battleships.MyExceptions.*;
 import Battleships.Players.Human;
 import Battleships.Players.Player;
 import javafx.event.EventHandler;
-import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import Battleships.Board.Ship;
-import Battleships.Board.Coordinates;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
+
+import java.util.Stack;
+
 /**
  * @author Adonis Tseriotis
  *
@@ -24,6 +22,8 @@ import javafx.scene.text.Text;
  */
 public class Grid extends Parent implements Cloneable{
     public Player parentPlayer;
+    private Stack<Coordinates> toBePlaced;
+    private Ship toPlace;
     private VBox rows = new VBox();
 
     /**
@@ -66,32 +66,99 @@ public class Grid extends Parent implements Cloneable{
 
     /**
      *
-     * @param s Ship to add
      *
      */
-    public void markShipPos(Ship s){
+    public void markShipPos(){
+        for(Coordinates c: toBePlaced) {
+            if (parentPlayer instanceof Human)
+                c.setFill(Color.GREEN);
+            parentPlayer.myShips[toPlace.type-1] = true;
+            c.ship = toPlace;
+        }
+    }
+
+    public String canPlaceShip(Ship s){
         int x = s.initX;
         int y = s.initY;
-        //System.out.print(x);
-        //System.out.println(y);
+        toBePlaced = new Stack<>();
+        toPlace = s;
+
+        System.out.println(x);
+        System.out.println(y);
+        System.out.println(s.orientation);
+
         for(int i=0; i<s.TypetoSize(); i++)
         {
-            /*if(x<0 || x>9 || y<0 || y<9) {
-                OversizeException OutOfBounds =
-                        new OversizeException("Out of bounds");
-                throw OutOfBounds;
-            }*/
+            try {
+                if (x < 0 || x > 9 || y < 0 || y > 9) {
+                    throw new OversizeException("Out of bounds");
+                }
+            }
+            catch (OversizeException e){
+                return e.getMessage();
+            }
+
             Coordinates c = getSquare(x,y);
 
-            if(parentPlayer instanceof Human)
-                c.setFill(Color.GREEN);
-            /*if(c.ship != null){
-                OverlapTilesException Overlap =
-                        new OverlapTilesException("There is another ship here");
-                throw Overlap;
-            }*/
+            try{
+                if(c.ship != null){
+                    throw new OverlapTilesException("There is another ship here");
+                }
+            }
+            catch (OverlapTilesException e){
+                return e.getMessage();
+            }
 
-            c.ship = s;
+            try{
+                Coordinates n1 = getSquare(x-1,y);
+                Coordinates n2 = getSquare(x+1,y);
+                Coordinates n3 = getSquare(x,y-1);
+                Coordinates n4 = getSquare(x,y+1);
+
+                if(s.orientation == 2){
+                    if((n1!=null) && (toBePlaced.search(n1) == -1) && (!n1.isEmpty())) {
+                        throw new AdjacentTilesException("The ships are touching");
+                    }
+
+                    if(i==(s.TypetoSize()-1)){
+                        if(n2 != null && !n2.isEmpty())
+                            throw new AdjacentTilesException("The ships are touching");
+                    }
+
+                    if(((n3!=null)&&(!n3.isEmpty())) || ((n4!=null) && (!n4.isEmpty()))){
+                        throw new AdjacentTilesException("The ships are touching");
+                    }
+                }
+                else{
+                    if(((n1!=null)&&(!n1.isEmpty())) || ((n2!=null)&&(!n2.isEmpty()))){
+                        throw new AdjacentTilesException("The ships are touching");
+                    }
+
+                    if((n3!=null) && (toBePlaced.search(n3) == -1) && (!n3.isEmpty())){
+                        throw new AdjacentTilesException("The ships are touching");
+                    }
+
+                    if(i==(s.TypetoSize()-1)){
+                        if((n4!=null) && (!n4.isEmpty())){
+                            throw new AdjacentTilesException("The ships are touching");
+                        }
+                    }
+                }
+            }
+            catch (AdjacentTilesException e){
+                return e.getMessage();
+            }
+
+            try{
+                if(this.parentPlayer.myShips[s.type-1]){
+                    throw new InvalidCountException("There is only one ship of each type");
+                }
+            }
+            catch (InvalidCountException e){
+                return e.getMessage();
+            }
+
+            toBePlaced.push(c);
 
             switch(s.orientation)
             {
@@ -104,6 +171,7 @@ public class Grid extends Parent implements Cloneable{
                     break;
             }
         }
+        return "OK";
     }
 
 
@@ -115,6 +183,9 @@ public class Grid extends Parent implements Cloneable{
      * @return Coordinate instance with coordinates (x,y)
      */
     public Coordinates getSquare(int x, int y){
+        if (x < 0 || x > 9 || y < 0 || y > 9) {
+            return null;
+        }
         return (Coordinates)((HBox)rows.getChildren().get(x+1)).getChildren().get(y+1);
     }
 

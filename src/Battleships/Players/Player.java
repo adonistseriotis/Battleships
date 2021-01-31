@@ -14,7 +14,7 @@ import java.util.List;
  */
 public abstract class Player {
     public Grid myGrid;
-    public List<Ship> myShips;
+    public boolean myShips[] ={false, false, false, false, false};
     public int allShips;
     public boolean hasLost;
     public int points;

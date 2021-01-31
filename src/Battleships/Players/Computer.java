@@ -35,9 +35,16 @@ public class Computer extends Player{
     public boolean placeShip(Ship s) {
         if(allShips == 0)
             return false;
-        myGrid.markShipPos(s);
-        allShips--;
-        return true;
+        String ret = myGrid.canPlaceShip(s);
+        if(ret=="OK") {
+            myGrid.markShipPos();
+            allShips--;
+            return true;
+        }
+        else{
+            System.out.println(ret);
+            return false;
+        }
     }
 
     /**
