@@ -83,10 +83,6 @@ public class Grid extends Parent implements Cloneable{
         toBePlaced = new Stack<>();
         toPlace = s;
 
-        System.out.println(x);
-        System.out.println(y);
-        System.out.println(s.orientation);
-
         for(int i=0; i<s.TypetoSize(); i++)
         {
             try {

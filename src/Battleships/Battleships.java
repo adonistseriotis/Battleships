@@ -41,6 +41,28 @@ public class Battleships extends Application{
     private BorderPane root;
     private HBox topInfo;
 
+    private void popupError(boolean file,boolean human){
+        String s,u;
+        if(file)
+            s="Load new scenarios and start again.";
+        else
+            s="Try again.";
+        if(human)
+            u="player's";
+        else
+            u="computer's";
+        Stage popup = new Stage();
+        popup.initModality(Modality.APPLICATION_MODAL);
+        popup.setTitle("Error");
+        Text message = new Text("Error in " + u +" ship placement.\n"+s);
+        message.setStyle("-fx-font: 20 arial;");
+        HBox hbox = new HBox(100, message);
+        hbox.setAlignment(Pos.CENTER);
+        Scene scene = new Scene(hbox,500,500);
+        popup.setScene(scene);
+        popup.show();
+    }
+
     private void parseLine(String line, boolean hooman){
         String[] args = line.split(",");
             Ship s = new Ship(Integer.parseInt(args[0]), Integer.parseInt(args[1]),
@@ -295,8 +317,10 @@ public class Battleships extends Application{
                 return;
             orientation = (mouseClickEvent.getButton() == MouseButton.PRIMARY)?1:2;
             Ship s = new Ship(typeToPlace++, square.x, square.y, orientation);
-            if(!human.placeShip(s))
+            if(!human.placeShip(s)) {
+                popupError(false,true);
                 return;
+            }
             if(human.allShips == 0){
                 startGame(topInfo);
             }
@@ -356,8 +380,10 @@ public class Battleships extends Application{
                 return;
             orientation = (mouseClickEvent.getButton() == MouseButton.PRIMARY)?1:2;
             Ship s = new Ship((6-human.allShips), square.x, square.y, orientation);
-            if(!human.placeShip(s))
+            if(!human.placeShip(s)) {
+                popupError(false,true);
                 return;
+            }
             if(human.allShips == 0){
                 startGame(topInfo);
             }
@@ -507,33 +533,13 @@ public class Battleships extends Application{
     private void startGameFromSc(){
         for(Ship s: humanShips){
             if(!human.placeShip(s)){
-                Stage popup = new Stage();
-                popup.initModality(Modality.APPLICATION_MODAL);
-                popup.setTitle("Error");
-                Text message = new Text("Error in ship placement.\n" +
-                        "Load new scenarios and start again");
-                message.setStyle("-fx-font: 20 arial;");
-                HBox hbox = new HBox(100, message);
-                hbox.setAlignment(Pos.CENTER);
-                Scene scene = new Scene(hbox,200,200);
-                popup.setScene(scene);
-                popup.show();
+                popupError(true,true);
             }
         }
 
         for(Ship s: computerShips){
             if(!computer.placeShip(s)){
-                Stage popup = new Stage();
-                popup.initModality(Modality.APPLICATION_MODAL);
-                popup.setTitle("Error");
-                Text message = new Text("Error in ship placement.\n" +
-                        "Load new scenarios and start again");
-                message.setStyle("-fx-font: 20 arial;");
-                HBox hbox = new HBox(100, message);
-                hbox.setAlignment(Pos.CENTER);
-                Scene scene = new Scene(hbox,200,200);
-                popup.setScene(scene);
-                popup.show();
+                popupError(true,false);
             }
         }
 
@@ -551,6 +557,7 @@ public class Battleships extends Application{
         running = true;
         System.out.println("Game started");
     }
+
     private void startGame(HBox topInfo){
 
         while(true) {
