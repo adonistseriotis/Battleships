@@ -9,8 +9,7 @@ import java.util.Random;
 import Battleships.Players.Computer;
 import Battleships.Players.Human;
 import Battleships.Players.Player;
-import com.sun.scenario.effect.impl.sw.java.JSWBlend_MULTIPLYPeer;
-import javafx.scene.Node;
+
 import javafx.scene.control.*;
 import javafx.application.Application;
 import javafx.geometry.Pos;
@@ -188,6 +187,7 @@ public class Battleships extends Application{
             if(!running)
                 return;
 
+            Coordinates computerAttackSquare;
             Coordinates attackSquare = (Coordinates) mouseClickEvent.getSource();
             if(attackSquare.isShot)
                 return;
@@ -229,22 +229,22 @@ public class Battleships extends Application{
             refreshInfo(topInfo,human);
             refreshInfo(topInfo,computer);
 
-            if(computer.findNextShot()==null)
-                attackSquare = computer.findNextShot();
+            if((computerAttackSquare = computer.findNextShot())==null)
+                computerAttackSquare = computer.findNextShot();
 
             if(computerMoves.size() > 5)
                 computerMoves.remove();
 
-            if(attackSquare.ship == null)
+            if(computerAttackSquare.ship == null)
             {
-                Moves m = new Moves(attackSquare.x, attackSquare.y, "Missed","");
+                Moves m = new Moves(computerAttackSquare.x, computerAttackSquare.y, "Missed","");
                 computerMoves.add(m);
             }
             else{
-                String action = attackSquare.ship.state.name().toLowerCase(Locale.ROOT);
+                String action = computerAttackSquare.ship.state.name().toLowerCase(Locale.ROOT);
                 action = action.substring(0,1).toUpperCase(Locale.ROOT) + action.substring(1);
-                Moves m = new Moves((attackSquare.x), attackSquare.y,
-                        action,attackSquare.ship.TypetoName());
+                Moves m = new Moves((computerAttackSquare.x), computerAttackSquare.y,
+                        action,computerAttackSquare.ship.TypetoName());
                 computerMoves.add(m);
             }
 
@@ -266,6 +266,8 @@ public class Battleships extends Application{
                 return;
 
             Coordinates square = (Coordinates) mouseClickEvent.getSource();
+            if(!square.isEmpty())
+                return;
             orientation = (mouseClickEvent.getButton() == MouseButton.PRIMARY)?1:2;
             Ship s = new Ship(typeToPlace++, square.x, square.y, orientation);
             human.placeShip(s);

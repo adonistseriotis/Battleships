@@ -91,12 +91,17 @@ public class Computer extends Player{
 
         else{
             Coordinates nextAttackSquare;
-            do{
+            while(true){
                 if(nextShots.isEmpty()) {
                     return null;
                 }
                 nextAttackSquare = nextShots.pop();
-            }while(!nextAttackSquare.isEmpty());
+                if(nextAttackSquare.isShot)
+                    continue;
+                else
+                    break;
+
+            }
 
             if(enemy.shotsTaken(nextAttackSquare) > 0){
                 x = nextAttackSquare.x;
