@@ -1,15 +1,17 @@
 package Battleships;
 
 
-import java.util.LinkedList;
-import java.util.Locale;
-import java.util.Queue;
-import java.util.Random;
+import java.io.*;
+import java.util.*;
 
+import Battleships.Board.Coordinates;
+import Battleships.Board.Grid;
+import Battleships.Board.Ship;
 import Battleships.Players.Computer;
 import Battleships.Players.Human;
 import Battleships.Players.Player;
 
+import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.application.Application;
 import javafx.geometry.Pos;
@@ -20,11 +22,9 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.HBox;
 import javafx.scene.text.Text;
+import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import Battleships.Board.Coordinates;
-import Battleships.Board.Grid;
-import Battleships.Board.Ship;
 
 
 public class Battleships extends Application{
@@ -36,20 +36,75 @@ public class Battleships extends Application{
     private int orientation;
     private Queue<Moves> humanMoves = new LinkedList<>();
     private Queue<Moves> computerMoves = new LinkedList<>();
+    HBox topInfo;
 
-    private MenuBar createMenu(Grid computerGrid) {
+    private void parseLine(String line, boolean hooman){
+        String[] args = line.split(",");
+            Ship s = new Ship(Integer.parseInt(args[0]), Integer.parseInt(args[1]),
+                    Integer.parseInt(args[2]), Integer.parseInt(args[3]));
+        if(hooman){
+            human.placeShip(s);
+        }
+        else{
+            computer.placeShip(s);
+        }
+    }
+
+    private void parseFile(File scenario, boolean human){
+        FileReader fRead=null;
+        try {
+            fRead = new FileReader(scenario.getAbsolutePath());
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        try (BufferedReader reader = new BufferedReader(fRead)) {
+            String line;
+            while((line=reader.readLine()) != null){
+                parseLine(line,human);
+            }
+        }
+        catch (IOException e){
+            e.printStackTrace();
+        }
+
+    }
+
+    private MenuBar createMenu() {
         MenuBar menuBar = new MenuBar();
         /* First menu */
         Menu application = new Menu("Application");
         MenuItem start = new MenuItem("Start");
-        //start.setOnAction();
-        MenuItem load = new MenuItem("Load");
-        MenuItem exit = new MenuItem("Exit");
-        exit.setOnAction(click->{
-            System.exit(0);
+        start.setOnAction(click->startGame(topInfo));
+
+        MenuItem loadP = new MenuItem("Load player scenario");
+        loadP.setOnAction(click -> {
+            FileChooser fileChooser = new FileChooser();
+            FileChooser.ExtensionFilter fileExtension = new FileChooser.ExtensionFilter("Select scenarios (*.txt)", "*.txt");
+            fileChooser.getExtensionFilters().add(fileExtension);
+            File pScenario = fileChooser.showOpenDialog(new Stage());
+            if(pScenario != null) {
+                parseFile(pScenario,true);
+            }
         });
+
+        MenuItem loadC = new MenuItem(("Load computer scenario"));
+        loadC.setOnAction(click -> {
+            FileChooser fileChooser = new FileChooser();
+            FileChooser.ExtensionFilter fileExtension = new FileChooser.ExtensionFilter("Select scenarios (*.txt)", "*.txt");
+            fileChooser.getExtensionFilters().add(fileExtension);
+            File pScenario = fileChooser.showOpenDialog(new Stage());
+            if(pScenario != null) {
+                parseFile(pScenario,false);
+            }
+        });
+
+        MenuItem exit = new MenuItem("Exit");
+        exit.setOnAction(click->
+                System.exit(0));
+
         application.getItems().add(start);
-        application.getItems().add(load);
+        application.getItems().add(loadP);
+        application.getItems().add(loadC);
         application.getItems().add(exit);
         menuBar.getMenus().add(application);
 
@@ -68,12 +123,13 @@ public class Battleships extends Application{
             popup.setScene(scene);
             popup.show();
         });
+
         MenuItem playerShots = new MenuItem("Player Shots");
         playerShots.setOnAction(click->{
             Stage popup = new Stage();
             popup.initModality(Modality.APPLICATION_MODAL);
             popup.setTitle("Player shots");
-            String s = new String("");
+            String s = "";
             for(Moves m : humanMoves){
                 s += m.printMe();
             }
@@ -85,12 +141,13 @@ public class Battleships extends Application{
             popup.setScene(scene);
             popup.show();
         });
+
         MenuItem enemyShots = new MenuItem("Computer Shots");
         enemyShots.setOnAction(click->{
             Stage popup = new Stage();
             popup.initModality(Modality.APPLICATION_MODAL);
             popup.setTitle("Computer shots");
-            String s = new String("");
+            String s = "";
             for(Moves m : computerMoves){
                 s += m.printMe();
             }
@@ -102,6 +159,7 @@ public class Battleships extends Application{
             popup.setScene(scene);
             popup.show();
         });
+
         details.getItems().add(enemyShips);
         details.getItems().add(playerShots);
         details.getItems().add(enemyShots);
@@ -150,6 +208,25 @@ public class Battleships extends Application{
         return topInfo;
     }
 
+    private HBox createInput(){
+        HBox inputDialog = new HBox(2);
+        inputDialog.setPadding(new Insets(50,50,50,50));
+        inputDialog.setAlignment(Pos.CENTER);
+
+        TextField x = new TextField();
+        x.setPromptText("Input x coordinate");
+        inputDialog.getChildren().add(x);
+
+        TextField y = new TextField();
+        y.setPromptText("Input y coordinate");
+        inputDialog.getChildren().add(y);
+
+        Button attack = new Button("Attack");
+        inputDialog.getChildren().add(attack);
+
+        return inputDialog;
+    }
+
     private void refreshInfo(HBox topInfo, Player player) {
         VBox playerInfo;
         String owner;
@@ -163,19 +240,19 @@ public class Battleships extends Application{
         }
         Text ships = (Text) playerInfo.getChildren().get(0);
         ships.setText(null);
-        ships.setText(owner+" ships: " + Integer.toString(5 - player.allShips));
+        ships.setText(owner+" ships: " + (5 - player.allShips));
         Text points = (Text) playerInfo.getChildren().get(1);
         points.setText(null);
-        points.setText(owner + " points: " + Integer.toString(player.points));
+        points.setText(owner + " points: " + (player.points));
         Text shots = (Text) playerInfo.getChildren().get(2);
         shots.setText(null);
-        shots.setText(owner + " shots: " + Integer.toString(40-player.shotsLeft));
+        shots.setText(owner + " shots: " + (40-player.shotsLeft));
     }
 
     private Parent createBorders(){
         BorderPane root = new BorderPane();
         root.setPrefSize(1000,1000);
-        HBox topInfo = createInfo();
+        topInfo = createInfo();
 
         human = new Human();
         computer = new Computer();
@@ -187,71 +264,16 @@ public class Battleships extends Application{
             if(!running)
                 return;
 
-            Coordinates computerAttackSquare;
             Coordinates attackSquare = (Coordinates) mouseClickEvent.getSource();
             if(attackSquare.isShot)
                 return;
 
-            switch (computerGrid.parentPlayer.shotsTaken(attackSquare)) {
-                /* No damage */
-                case 0:
-                    if(humanMoves.size() > 5)
-                        humanMoves.remove();
-                    Moves m1 = new Moves(attackSquare.x, attackSquare.y,"Missed", "");
-                    humanMoves.add(m1);
-                    System.out.println("No damage");
-                    break;
-                /* Hit something */
-                case 1:
-                    if(humanMoves.size() > 5)
-                        humanMoves.remove();
-                    Moves m2 = new Moves(attackSquare.x, attackSquare.y,"Hit", attackSquare.ship.TypetoName());
-                    humanMoves.add(m2);
-                    System.out.println("Hit something");
-                    break;
-                /* Sank something */
-                case 2:
-                    if(humanMoves.size() > 5)
-                        humanMoves.remove();
-                    Moves m3 = new Moves(attackSquare.x, attackSquare.y,"Sank", attackSquare.ship.TypetoName());
-                    humanMoves.add(m3);
-                    if (computerGrid.parentPlayer.enemy.allShips == 5) {
-                        /* Computer Lost */
-                        System.out.println("You won!");
-                    }
-                    break;
-            }
+            humanPlay(attackSquare);
 
-            if(computer.hasLost){
-                System.out.println("You won!");
-                System.exit(0);
-            }
             refreshInfo(topInfo,human);
             refreshInfo(topInfo,computer);
 
-            if((computerAttackSquare = computer.findNextShot())==null)
-                computerAttackSquare = computer.findNextShot();
-
-            if(computerMoves.size() > 5)
-                computerMoves.remove();
-
-            if(computerAttackSquare.ship == null)
-            {
-                Moves m = new Moves(computerAttackSquare.x, computerAttackSquare.y, "Missed","");
-                computerMoves.add(m);
-            }
-            else{
-                String action = computerAttackSquare.ship.state.name().toLowerCase(Locale.ROOT);
-                action = action.substring(0,1).toUpperCase(Locale.ROOT) + action.substring(1);
-                Moves m = new Moves((computerAttackSquare.x), computerAttackSquare.y,
-                        action,computerAttackSquare.ship.TypetoName());
-                computerMoves.add(m);
-            }
-
-            if(human.hasLost) {
-                System.out.println("Computer won!");
-                System.exit(0);
-            }
+            computerPlay();
 
             refreshInfo(topInfo,human);
             refreshInfo(topInfo,computer);
@@ -282,12 +304,117 @@ public class Battleships extends Application{
         hbox.setAlignment(Pos.CENTER);
         root.setCenter(hbox);
 
-        MenuBar menuBar = createMenu(computerGrid);
+        MenuBar menuBar = createMenu();
 
         VBox vbox = new VBox(50,menuBar,topInfo);
         root.setTop(vbox);
 
+        HBox input = createInput();
+        Button attack = (Button) input.getChildren().get(2);
+
+        attack.setOnMouseClicked(click->{
+            if(!running)
+                return;
+            TextField xCoord = (TextField) input.getChildren().get(0);
+            TextField yCoord = (TextField) input.getChildren().get(1);
+            int x = Integer.parseInt(xCoord.getText());
+            int y = Integer.parseInt(yCoord.getText());
+            if(x < 0 || x > 10 || y < 0 || y > 10){
+                xCoord.clear();
+                yCoord.clear();
+                return;
+            }
+
+            Coordinates attackSquare = computerGrid.getSquare(x,y);
+            if(attackSquare.isShot)
+                return;
+
+            humanPlay(attackSquare);
+
+            refreshInfo(topInfo,human);
+            refreshInfo(topInfo,computer);
+
+            computerPlay();
+
+            refreshInfo(topInfo,human);
+            refreshInfo(topInfo,computer);
+            System.out.println("Computer played");
+            xCoord.clear();
+            yCoord.clear();
+
+        });
+
+        root.setBottom(input);
+
         return root;
+    }
+
+    private void humanPlay(Coordinates attackSquare){
+
+        switch (computerGrid.parentPlayer.shotsTaken(attackSquare)) {
+            /* No damage */
+            case 0:
+                if(humanMoves.size() > 5)
+                    humanMoves.remove();
+                Moves m1 = new Moves(attackSquare.x, attackSquare.y,"Missed", "");
+                humanMoves.add(m1);
+                System.out.println("No damage");
+                break;
+            /* Hit something */
+            case 1:
+                if(humanMoves.size() > 5)
+                    humanMoves.remove();
+                Moves m2 = new Moves(attackSquare.x, attackSquare.y,"Hit", attackSquare.ship.TypetoName());
+                humanMoves.add(m2);
+                System.out.println("Hit something");
+                break;
+            /* Sank something */
+            case 2:
+                if(humanMoves.size() > 5)
+                    humanMoves.remove();
+                Moves m3 = new Moves(attackSquare.x, attackSquare.y,"Sank", attackSquare.ship.TypetoName());
+                humanMoves.add(m3);
+                if (computerGrid.parentPlayer.enemy.allShips == 5) {
+                    /* Computer Lost */
+                    System.out.println("You won!");
+                }
+                break;
+        }
+
+        if(computer.hasLost){
+            System.out.println("You won!");
+            System.exit(0);
+        }
+
+    }
+
+    private void computerPlay(){
+
+        Coordinates computerAttackSquare;
+
+        if((computerAttackSquare = computer.findNextShot())==null)
+            computerAttackSquare = computer.findNextShot();
+
+        if(computerMoves.size() > 5)
+            computerMoves.remove();
+
+        if(computerAttackSquare.ship == null)
+        {
+            Moves m = new Moves(computerAttackSquare.x, computerAttackSquare.y, "Missed","");
+            computerMoves.add(m);
+        }
+        else{
+            String action = computerAttackSquare.ship.state.name().toLowerCase(Locale.ROOT);
+            action = action.substring(0,1).toUpperCase(Locale.ROOT) + action.substring(1);
+            Moves m = new Moves((computerAttackSquare.x), computerAttackSquare.y,
+                    action,computerAttackSquare.ship.TypetoName());
+            computerMoves.add(m);
+        }
+
+        if(human.hasLost) {
+            System.out.println("Computer won!");
+            System.exit(0);
+        }
     }
 
     private void startGame(HBox topInfo){
@@ -328,7 +455,6 @@ public class Battleships extends Application{
     }
 
     public static void main(String[] args){
-        System.out.println(args);
         launch(args);
     }
 
