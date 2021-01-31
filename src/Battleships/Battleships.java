@@ -36,17 +36,20 @@ public class Battleships extends Application{
     private int orientation;
     private Queue<Moves> humanMoves = new LinkedList<>();
     private Queue<Moves> computerMoves = new LinkedList<>();
-    HBox topInfo;
+    private Stack<Ship> humanShips = new Stack<>();
+    private Stack<Ship> computerShips = new Stack<>();
+    private BorderPane root;
+    private HBox topInfo;
 
     private void parseLine(String line, boolean hooman){
         String[] args = line.split(",");
             Ship s = new Ship(Integer.parseInt(args[0]), Integer.parseInt(args[1]),
                     Integer.parseInt(args[2]), Integer.parseInt(args[3]));
         if(hooman){
-            human.placeShip(s);
+            humanShips.push(s);
         }
         else{
-            computer.placeShip(s);
+            computerShips.push(s);
         }
     }
 
@@ -74,7 +77,10 @@ public class Battleships extends Application{
         /* First menu */
         Menu application = new Menu("Application");
         MenuItem start = new MenuItem("Start");
-        start.setOnAction(click->startGame(topInfo));
+        start.setOnAction(click->{
+            initialize();
+            startGameFromSc();
+        });
 
         MenuItem loadP = new MenuItem("Load player scenario");
         loadP.setOnAction(click -> {
@@ -249,10 +255,67 @@ public class Battleships extends Application{
         shots.setText(owner + " shots: " + (40-player.shotsLeft));
     }
 
-    private Parent createBorders(){
-        BorderPane root = new BorderPane();
-        root.setPrefSize(1000,1000);
+    private void initialize() {
+        human = new Human();
+        computer = new Computer();
+        human.enemy = computer;
+        computer.enemy = human;
+        running = false;
+
+        computerGrid = new Grid(computer,
+                mouseClickEvent -> {
+                    if(!running)
+                        return;
+
+                    Coordinates attackSquare = (Coordinates) mouseClickEvent.getSource();
+                    if(attackSquare.isShot)
+                        return;
+
+                    humanPlay(attackSquare);
+
+                    refreshInfo(topInfo,human);
+                    refreshInfo(topInfo,computer);
+
+                    computerPlay();
+
+                    refreshInfo(topInfo,human);
+                    refreshInfo(topInfo,computer);
+                    //System.out.println("Computer played");
+
+                });
+
+        computer.myGrid = computerGrid;
+
+        humanGrid = new Grid(human, mouseClickEvent -> {
+            if(running)
+                return;
+
+            Coordinates square = (Coordinates) mouseClickEvent.getSource();
+            if(!square.isEmpty())
+                return;
+            orientation = (mouseClickEvent.getButton() == MouseButton.PRIMARY)?1:2;
+            Ship s = new Ship(typeToPlace++, square.x, square.y, orientation);
+            human.placeShip(s);
+            if(human.allShips == 0){
+                startGame(topInfo);
+            }
+        });
+
+        human.myGrid = humanGrid;
+
+        HBox hbox = new HBox(80, humanGrid, computerGrid);
+        hbox.setAlignment(Pos.CENTER);
+        root.setCenter(hbox);
+
         topInfo = createInfo();
+        MenuBar menuBar = createMenu();
+        VBox vbox = new VBox(50,menuBar,topInfo);
+        root.setTop(vbox);
+    }
+
+    private Parent createBorders(){
+        root = new BorderPane();
+        root.setPrefSize(1000,1000);
 
         human = new Human();
         computer = new Computer();
@@ -277,7 +340,7 @@ public class Battleships extends Application{
 
             refreshInfo(topInfo,human);
             refreshInfo(topInfo,computer);
-            System.out.println("Computer played");
+            //System.out.println("Computer played");
 
         });
 
@@ -305,6 +368,7 @@ public class Battleships extends Application{
         root.setCenter(hbox);
 
         MenuBar menuBar = createMenu();
+        topInfo = createInfo();
 
         VBox vbox = new VBox(50,menuBar,topInfo);
         root.setTop(vbox);
@@ -338,7 +402,7 @@ public class Battleships extends Application{
 
             refreshInfo(topInfo,human);
             refreshInfo(topInfo,computer);
-            System.out.println("Computer played");
+            //System.out.println("Computer played");
             xCoord.clear();
             yCoord.clear();
 
@@ -358,7 +422,7 @@ public class Battleships extends Application{
                     humanMoves.remove();
                 Moves m1 = new Moves(attackSquare.x, attackSquare.y,"Missed", "");
                 humanMoves.add(m1);
-                System.out.println("No damage");
+                //System.out.println("No damage");
                 break;
             /* Hit something */
             case 1:
@@ -366,7 +430,7 @@ public class Battleships extends Application{
                     humanMoves.remove();
                 Moves m2 = new Moves(attackSquare.x, attackSquare.y,"Hit", attackSquare.ship.TypetoName());
                 humanMoves.add(m2);
-                System.out.println("Hit something");
+                //System.out.println("Hit something");
                 break;
             /* Sank something */
             case 2:
@@ -389,7 +453,16 @@ public class Battleships extends Application{
     }
 
     private void computerPlay(){
+        if(human.shotsLeft == 0){
+            String winner;
+            if ((human.points > computer.points))
+                winner = "Player";
+            else
+                winner = "Computer";
 
+            System.out.println(winner + " won");
+            System.exit(0);
+        }
         Coordinates computerAttackSquare;
 
         if((computerAttackSquare = computer.findNextShot())==null)
@@ -415,8 +488,43 @@ public class Battleships extends Application{
             System.out.println("Computer won!");
             System.exit(0);
         }
+
+        if(computer.shotsLeft == 0){
+            String winner;
+            if ((human.points > computer.points))
+                winner = "Player";
+            else
+                winner = "Computer";
+
+            System.out.println(winner + " won");
+            System.exit(0);
+        }
+        
     }
 
+    private void startGameFromSc(){
+        for(Ship s: humanShips){
+            human.placeShip(s);
+        }
+
+        for(Ship s: computerShips){
+            computer.placeShip(s);
+        }
+
+        int turn = random.nextInt(2);
+        switch (turn){
+            case 0:
+                System.out.println("Computer turn");
+                computerPlay();
+                refreshInfo(topInfo,computer);
+                break;
+            case 1:
+                System.out.println("Your turn");
+                break;
+        }
+        running = true;
+        System.out.println("Game started");
+    }
     private void startGame(HBox topInfo){
         Ship s1 = new Ship(1,8,4,1);
         computer.placeShip(s1);
@@ -433,7 +541,7 @@ public class Battleships extends Application{
         switch (turn){
             case 0:
                 System.out.println("Computer turn");
-                computer.findNextShot();
+                computerPlay();
                 refreshInfo(topInfo,computer);
                 break;
             case 1:

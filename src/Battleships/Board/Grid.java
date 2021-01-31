@@ -72,8 +72,8 @@ public class Grid extends Parent implements Cloneable{
     public void markShipPos(Ship s){
         int x = s.initX;
         int y = s.initY;
-        System.out.print(x);
-        System.out.println(y);
+        //System.out.print(x);
+        //System.out.println(y);
         for(int i=0; i<s.TypetoSize(); i++)
         {
             /*if(x<0 || x>9 || y<0 || y<9) {
