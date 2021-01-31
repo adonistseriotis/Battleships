@@ -17,10 +17,8 @@ public class Computer extends Player{
 
     private Stack<Coordinates> nextShots;
     private Random random = new Random();
-    private Human enemy;
 
-    public Computer(Grid grid){
-        this.myGrid = grid;
+    public Computer(){
         this.allShips = 5;
         this.hasLost = false;
         this.points = 0;
@@ -51,9 +49,9 @@ public class Computer extends Player{
     public int shotsTaken(Coordinates square){
         enemy.shotsLeft--;
         if(square.shotsFired()){
-            points += square.ship.TypetoHitpoints();
+            enemy.points += square.ship.TypetoHitpoints();
             if(square.ship.hit()){
-                points += square.ship.TypetoSinkpoints();
+                enemy.points += square.ship.TypetoSinkpoints();
                 allShips++;
                 if(allShips==5)
                     hasLost = true;
@@ -67,7 +65,7 @@ public class Computer extends Player{
     /**
      * Function to find next shot of computer
      */
-    public void findNextShot(){
+    public Coordinates findNextShot(){
         int x,y;
         if(nextShots.isEmpty()){
             while(true) {
@@ -86,13 +84,20 @@ public class Computer extends Player{
                         if (y + 1 < 10)
                             nextShots.push(enemy.myGrid.getSquare(x, y + 1));
                     }
-                    break;
+                    return attackSquare;
                 }
             }
         }
 
         else{
-            Coordinates nextAttackSquare = nextShots.pop();
+            Coordinates nextAttackSquare;
+            do{
+                if(nextShots.isEmpty()) {
+                    return null;
+                }
+                nextAttackSquare = nextShots.pop();
+            }while(!nextAttackSquare.isEmpty());
+
             if(enemy.shotsTaken(nextAttackSquare) > 0){
                 x = nextAttackSquare.x;
                 y = nextAttackSquare.y;
@@ -106,6 +111,7 @@ public class Computer extends Player{
                 if (y + 1 < 10)
                     nextShots.push(enemy.myGrid.getSquare(x, y + 1));
             }
+            return nextAttackSquare;
         }
     }
 }

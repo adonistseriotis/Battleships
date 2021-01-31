@@ -1,10 +1,6 @@
 package Battleships.Board;
 
 
-import java.util.*;
-import java.util.HashMap;
-import Battleships.Board.Coordinates;
-
 /**
  * @author Adonis Tseriotis
  *
@@ -13,7 +9,7 @@ import Battleships.Board.Coordinates;
  */
 
 public class Ship {
-    private static Map<Integer, Integer> Size = new HashMap<>();
+    /*private static Map<Integer, Integer> Size = new HashMap<>();
     static{
         Size.put(1,5);
         Size.put(2,4);
@@ -38,8 +34,12 @@ public class Ship {
             SinkPoints.put(3,250);
             SinkPoints.put(4,0);
             SinkPoints.put(5,0);
-    }
+    }*/
 
+    private static int size[] = {5,4,3,3,2};
+    private static int hitPoints[] = {350,250,100,100,50};
+    private static int sinkPoints[] = {1000,500,250,0,0};
+    private static String name[] = {"Carrier","Battleship","Cruiser","Submarine","Destroyer"};
     public enum State{
         INTACT,
         HIT,
@@ -51,7 +51,6 @@ public class Ship {
     public int initX;
     public int initY;
     public State state;
-    public List<Coordinates> position;
     public int hitpoints;
 
     /**
@@ -72,15 +71,19 @@ public class Ship {
     }
 
     public int TypetoSize(){
-        return Size.get(this.type);
+        return size[this.type-1];
     }
 
     public int TypetoHitpoints(){
-        return HitPoints.get(this.type);
+        return hitPoints[this.type-1];
     }
 
     public int TypetoSinkpoints(){
-        return SinkPoints.get(this.type);
+        return sinkPoints[this.type-1];
+    }
+
+    public String TypetoName(){
+        return name[this.type-1];
     }
 
     public boolean hit(){

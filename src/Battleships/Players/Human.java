@@ -12,8 +12,7 @@ import Battleships.Board.Ship;
  */
 public class Human extends Player{
 
-    public Human(Grid grid){
-        this.myGrid = grid;
+    public Human(){
         this.allShips = 5;
         this.hasLost = false;
         this.points = 0;
@@ -43,9 +42,9 @@ public class Human extends Player{
     public int shotsTaken(Coordinates square){
         enemy.shotsLeft--;
         if(square.shotsFired()){
-            points += square.ship.TypetoHitpoints();
+            enemy.points += square.ship.TypetoHitpoints();
             if(square.ship.hit()){
-                points += square.ship.TypetoSinkpoints();
+                enemy.points += square.ship.TypetoSinkpoints();
                 allShips++;
                 if(allShips==5)
                     hasLost = true;
@@ -59,4 +58,8 @@ public class Human extends Player{
     /*
     Human fire is handled by mouse handler
      */
+    @Override
+    public Coordinates findNextShot(){
+        return null;
+    }
 }
