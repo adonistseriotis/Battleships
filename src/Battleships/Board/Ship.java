@@ -39,6 +39,7 @@ public class Ship {
     private static int size[] = {5,4,3,3,2};
     private static int hitPoints[] = {350,250,100,100,50};
     private static int sinkPoints[] = {1000,500,250,0,0};
+    private static String name[] = {"Carrier","Battleship","Cruiser","Submarine","Destroyer"};
     public enum State{
         INTACT,
         HIT,
@@ -79,6 +80,10 @@ public class Ship {
 
     public int TypetoSinkpoints(){
         return sinkPoints[this.type-1];
+    }
+
+    public String TypetoName(){
+        return name[this.type-1];
     }
 
     public boolean hit(){

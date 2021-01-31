@@ -16,7 +16,7 @@ public class Coordinates extends Rectangle{
     private Grid parentGrid;
 
     public Coordinates(int x,int y, Grid grid) {
-        super(30, 30);
+        super(40, 40);
         this.x = x;
         this.y = y;
         this.parentGrid = grid;

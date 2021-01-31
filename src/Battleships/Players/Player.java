@@ -23,5 +23,5 @@ public abstract class Player {
 
     abstract public boolean placeShip(Ship s);
     abstract public int shotsTaken(Coordinates square);
-    abstract public void findNextShot();
+    abstract public Coordinates findNextShot();
 }

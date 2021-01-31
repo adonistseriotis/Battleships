@@ -42,9 +42,9 @@ public class Human extends Player{
     public int shotsTaken(Coordinates square){
         enemy.shotsLeft--;
         if(square.shotsFired()){
-            points += square.ship.TypetoHitpoints();
+            enemy.points += square.ship.TypetoHitpoints();
             if(square.ship.hit()){
-                points += square.ship.TypetoSinkpoints();
+                enemy.points += square.ship.TypetoSinkpoints();
                 allShips++;
                 if(allShips==5)
                     hasLost = true;
@@ -59,7 +59,7 @@ public class Human extends Player{
     Human fire is handled by mouse handler
      */
     @Override
-    public void findNextShot(){
-        return;
+    public Coordinates findNextShot(){
+        return null;
     }
 }
