@@ -63,7 +63,7 @@ public class Human extends Player{
     }
 
     /*
-    Human fire is handled by mouse handler
+    Human fire is handled by mouse handler or form
      */
     @Override
     public Coordinates findNextShot(){

@@ -70,22 +70,42 @@ public class Ship {
         this.hitpoints = this.TypetoSize();
     }
 
+    /**
+     * getter method for size array
+     * @return size of this.type
+     */
     public int TypetoSize(){
         return size[this.type-1];
     }
 
+    /**
+     * getter method for hitPoints array
+     * @return hitPoints of this.type
+     */
     public int TypetoHitpoints(){
         return hitPoints[this.type-1];
     }
 
+    /**
+     * getter method for sinkPoints array
+     * @return sinkPoints of this.type
+     */
     public int TypetoSinkpoints(){
         return sinkPoints[this.type-1];
     }
 
+    /**
+     * getter method for name array
+     * @return Name of this.type
+     */
     public String TypetoName(){
         return name[this.type-1];
     }
 
+    /**
+     * Mark ship as hit
+     * @return true if ship is sank false otherwise
+     */
     public boolean hit(){
         this.state = State.HIT;
         hitpoints--;

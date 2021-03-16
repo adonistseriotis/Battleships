@@ -199,7 +199,7 @@ public class Battleships extends Application{
     private HBox createInfo(){
         HBox topInfo = new HBox();
 
-        VBox playerInfo = new VBox(5);
+        VBox playerInfo = new VBox();
         playerInfo.setPrefWidth(500);
         playerInfo.setAlignment(Pos.CENTER);
 

@@ -18,6 +18,9 @@ public class Computer extends Player{
     private Stack<Coordinates> nextShots;
     private Random random = new Random();
 
+    /**
+     * Constructor
+     */
     public Computer(){
         this.allShips = 5;
         this.hasLost = false;
